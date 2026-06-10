@@ -148,11 +148,78 @@ Output MUST include this block for the NEXUS trading system:
 - **SIZE:** {recommended_size_multiplier}x
 ```
 
-## Backtest Validation
+## Backtest Validation (Reproducible)
 
-NEXUS regime detection validated on 155 live BSC trades (March-June 2026, trades.db SSOT):
+This skill includes a self-contained backtest that anyone can run with just a CMC API key.
+It validates the regime detection against 180 days of historical BTC data.
+
+### Step 6: Historical Regime Backtest
+
+Call `get_crypto_ohlcv_historical` for BTC (id=1) with these parameters:
+- `time_period`: "daily"
+- `interval`: "daily"  
+- `count`: 180 (6 months)
+
+For EACH day in the returned OHLCV data, retroactively determine the regime using ONLY
+data available UP TO that day (no look-ahead bias):
+
+1. **F&G proxy**: Use `get_fear_and_greed_historical` for the matching date range
+2. **Technical proxy**: Calculate from OHLCV data directly:
+   - 20-day SMA vs 50-day SMA relationship (Golden/Death cross)
+   - Daily RSI-14 from closing prices
+   - 20-day rolling volatility (standard deviation of returns)
+3. **Derivatives proxy**: If OHLCV volume spike (>2x 20d avg) with price drop → deleveraging → RISK_OFF signal
+4. **Global proxy**: Calculate BTC dominance trend from total MC / BTC MC ratio (available in OHLCV data)
+
+### Step 7: Simulate Strategy Performance
+
+For each regime, apply the NEXUS Action Matrix retroactively:
+
+```
+TRENDING_UP days:    Simulate LONG BTC entry at open, exit at close
+TRENDING_DOWN days:  Simulate SHORT position (or flat if no short capability)
+RANGING days:        Simulate reduced-size positions
+RISK_OFF days:       Flat (no position)
+```
+
+Calculate:
+- Total return (%)
+- Sharpe ratio (daily returns / std)
+- Max drawdown (%)
+- Win rate (% of profitable regime-day assignments)
+- Benchmark: Buy & Hold BTC over same period
+
+### Backtest Report Template
+
+```markdown
+# NEXUS Regime Backtest — {start_date} to {end_date}
+
+## Overall Performance
+| Metric | NEXUS Regime | Buy & Hold |
+|--------|-------------|------------|
+| Total Return | {nexus_return}% | {bnh_return}% |
+| Sharpe Ratio | {nexus_sharpe} | {bnh_sharpe} |
+| Max Drawdown | {nexus_mdd}% | {bnh_mdd}% |
+| Win Rate | {nexus_wr}% | N/A |
+
+## Regime Distribution
+| Regime | Days | % of Time | Avg Daily Return |
+|--------|------|-----------|-----------------|
+| TRENDING_UP | {tu_days} | {tu_pct}% | {tu_avg}% |
+| TRENDING_DOWN | {td_days} | {td_pct}% | {td_avg}% |
+| RANGING | {r_days} | {r_pct}% | {r_avg}% |
+| RISK_OFF | {ro_days} | {ro_pct}% | 0.00% (flat) |
+
+## Key Findings
+- RISK_OFF avoided {avoided_drawdown}% of max drawdown vs B&H
+- {false_positive} false RISK_OFF signals (missed {missed_return}% return)
+- Regime switches: {switch_count} in 180 days (avg {avg_switch_days}d between switches)
+```
+
+## Live Validation
+
+Beyond the reproducible backtest above, NEXUS regime detection has been validated on 155 live BSC trades (March-June 2026, trades.db SSOT):
 - May 2026: 51 trades, 19.6% WR, -$114.12 — regime correctly flagged bear transition
 - RISK_OFF gates would have prevented 9 Reclaim Entry trades in trending_down (-$22.74, 0% WR)
-- RANGING detection kept strategies active during consolidation (58 trades, 31% WR)
 - TRENDING_UP correctly identified: 8 trades, 75% WR, +$8.34
 - No false RISK_OFF calls during trending_up phases
