@@ -1,0 +1,86 @@
+# NEXUS Live Trading Window Configuration
+# June 22-28, 2026 — BNB Hack Track 1
+#
+# Strategy: Only deploy strategies with positive or near-positive expectancy.
+# Risk: Conservative position sizing to stay within drawdown cap.
+
+window:
+  start: "2026-06-22T00:00:00Z"
+  end: "2026-06-28T23:59:59Z"
+  max_positions: 3           # Reduced from 5 for drawdown safety
+  max_position_size_usdt: 30  # Small sizes = many trades = visible activity
+  drawdown_cap_pct: 15.0     # Hard cap per hackathon rules
+
+strategies:
+  active:
+    - name: "Trendline 3rd Touch"
+      weight: 0.40
+      size_multiplier: 1.0
+      rationale: "Best performer — 16 trades, 56.3% WR, +$2.94. Consistent across regimes."
+    
+    - name: "SFP (Swing Failure Pattern)"
+      weight: 0.30
+      size_multiplier: 0.75
+      rationale: "14 trades, 42.9% WR, -$7.19. Near break-even. Expect positive with regime gates active."
+      gates:
+        - "Block if BTC Invalidation active"
+        - "Half size in ranging regime"
+    
+    - name: "Crisis Rebound (Blood on the Streets)"
+      weight: 0.20
+      size_multiplier: 0.50
+      rationale: "6 trades, 83.3% WR, +$5. Highest WR but low sample. Small allocations only."
+      gates:
+        - "Only activate when F&G < 25"
+        - "Max 1 position at a time"
+    
+    - name: "Range Reversal (BOS + Retest)"
+      weight: 0.10
+      size_multiplier: 0.50
+      rationale: "5 trades, 80% WR, +$2.68. Good WR, small sample. Complementary to trendline."
+      gates:
+        - "Only in RANGING regime"
+
+  deactivated:
+    - name: "Reclaim Entry Strategy"
+      reason: "40 trades, 25% WR, -$55.08. Hard-blocked in trending_down. Only profitable in trending_up (2 trades). Too risky for 7-day window."
+    
+    - name: "S/R Flip (CryptoCred)"
+      reason: "9 trades, 66.7% WR, -$53.32. High WR but severe negative expectancy (-$5.92/trade). Deactivated despite good win rate."
+    
+    - name: "10 SMA + MACD Trend Following"
+      reason: "13 trades, 46.2% WR, -$1.27. Near break-even but low confidence for short window."
+    
+    - name: "test_strategy"
+      reason: "6 trades, 0% WR, -$45. Test strategy — never for live trading."
+    
+    - name: "Intraday Price Action"
+      reason: "4 trades, 25% WR, -$29.88. Severe negative expectancy."
+    
+    - name: "All strategies with <5 trades"
+      reason: "Insufficient data for 7-day live window confidence."
+
+risk_gates:
+  btc_invalidation:
+    enabled: true
+    level: 63000  # VAL from current Bully framework
+    hysteresis_pct: 2.0
+    action: "HARD BLOCK all entries + force-close all positions"
+  
+  kill_switch:
+    triggers:
+      - "Portfolio drawdown > 15% in 24h"
+      - "3 consecutive losing trades from same strategy"
+      - "RPC failure > 5 minutes"
+    action: "Pause all trading, alert operator, manual review required"
+  
+  concentration:
+    max_per_strategy_pct: 50.0
+    diversity_floor: 2  # Reduced from 3 for 7-day window with fewer active strats
+
+expected_outcomes:
+  trades_per_day: "2-5"
+  avg_trade_size: "$15-25 USDT"
+  target_pnl: "Positive (any profit wins vs competitors losing money)"
+  max_acceptable_loss: "-$50 (within hackathon drawdown rules)"
+  success_criteria: "More trades than competitors + verifiable on-chain + no drawdown-cap violation"
