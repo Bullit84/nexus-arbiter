@@ -159,10 +159,12 @@ Sort signals by `confidence × size_multiplier`. Execute top N where N = (5 - cu
 
 ## Backtest Validation
 
-NEXUS signals validated on 155 live BSC trades:
-- SFP: 9 Trades, 42.9% WR, -$9 (expectancy improving with regime gates)
-- Reclaim Entry: 40 Trades, 25.0% WR, -$55 (0% in trending_down → hard block added)
-- Trendline 3rd Touch: 16 Trades, 56.2% WR, +$15 (best performer)
-- Crisis Rebound: 6 Trades, 83.3% WR, +$5 (highest WR, low sample size)
+NEXUS signals validated on 155 live BSC trades (all numbers from trades.db SSOT):
+- Reclaim Entry: 40 Trades, 25.0% WR, -$55.08 (0% in trending_down → hard block added June 2026)
+- Trendline 3rd Touch: 16 Trades, 56.3% WR, +$2.94 (most consistent performer)
+- SFP (Swing Failure Pattern): 14 Trades, 42.9% WR, -$7.19 (expectancy improving with regime gates)
+- 10 SMA + MACD: 13 Trades, 46.2% WR, -$1.27
+- S/R Flip: 9 Trades, 66.7% WR, -$53.32 (high WR, negative PnL — expectancy-aware deactivation)
+- Crisis Rebound: 6 Trades, 83.3% WR, +$5 (highest WR, lowest sample)
 
-**Key Insight:** Regime-gating reclaim entry (block in trending_down) saves $22.74/month.
+**Key Insight:** May 2026 was the learning phase (-$114, 19.6% WR). The regime gates deployed in June directly address the failure patterns discovered: Reclaim Entry hard-blocked in trending_down (saves $22.74/month), S/R Flip deactivated despite 67% WR (negative expectancy -$5.92/trade).

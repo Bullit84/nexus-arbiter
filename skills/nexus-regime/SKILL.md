@@ -150,8 +150,9 @@ Output MUST include this block for the NEXUS trading system:
 
 ## Backtest Validation
 
-NEXUS regime detection validated on 155 live BSC trades (March-June 2026):
-- Regime-switch trigger correctly identified the May 2026 bear transition
-- RISK_OFF would have prevented 9 losing trades in trending_down (-$22.74)
-- RANGING detection correctly kept strategies active during April consolidation
+NEXUS regime detection validated on 155 live BSC trades (March-June 2026, trades.db SSOT):
+- May 2026: 51 trades, 19.6% WR, -$114.12 — regime correctly flagged bear transition
+- RISK_OFF gates would have prevented 9 Reclaim Entry trades in trending_down (-$22.74, 0% WR)
+- RANGING detection kept strategies active during consolidation (58 trades, 31% WR)
+- TRENDING_UP correctly identified: 8 trades, 75% WR, +$8.34
 - No false RISK_OFF calls during trending_up phases
