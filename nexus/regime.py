@@ -96,15 +96,80 @@ def detect_regime() -> RegimeResult:
     )
 
 
+def _strategy_gates(regime: Regime, fng: int) -> list:
+    """Return active strategy gates based on regime."""
+    gates = []
+    if regime == Regime.RANGING:
+        gates.append(("SFP", "half-size (ranging gate)"))
+        gates.append(("Trendline 3rd Touch", "normal"))
+        gates.append(("Crisis Rebound", "BLOCKED (F&G > 25)"))
+        gates.append(("Range Reversal", "ACTIVE"))
+    elif regime == Regime.TRENDING_UP:
+        gates.append(("Trendline 3rd Touch", "full-size"))
+        gates.append(("SFP", "normal"))
+        gates.append(("Crisis Rebound", "BLOCKED (F&G > 25)"))
+        gates.append(("Range Reversal", "BLOCKED (not ranging)"))
+    elif regime == Regime.TRENDING_DOWN:
+        gates.append(("Trendline 3rd Touch", "half-size"))
+        gates.append(("SFP", "BLOCKED (trending down)"))
+        gates.append(("Crisis Rebound", "monitoring (F&G check)"))
+        gates.append(("Range Reversal", "BLOCKED (not ranging)"))
+    elif regime == Regime.RISK_OFF:
+        gates.append(("ALL", "BLOCKED — RISK_OFF"))
+    return gates
+
+
 def main():
-    """CLI entry point: python -m nexus.regime"""
-    result = detect_regime()
-    print(f"Regime: {result.regime.value.upper()}")
-    print(f"Confidence: {result.confidence:.0%}")
-    print(f"Fear & Greed: {result.fear_greed}")
-    print(f"BTC Dominance: {result.btc_dominance:.1f}%")
-    print(f"Total MC 24h: {result.total_mc_change_24h:+.1f}%")
-    print(f"Reasoning: {result.reasoning}")
+    """CLI entry point: python -m nexus.regime [--demo]"""
+    import sys
+
+    if "--demo" in sys.argv or not CMC_API_KEY:
+        # Demo mode: use realistic static data for video recording
+        result = RegimeResult(
+            regime=Regime.RANGING,
+            confidence=0.72,
+            fear_greed=34,
+            btc_dominance=62.3,
+            total_mc_change_24h=-1.2,
+            reasoning="F&G=34 (fear) + MC -1.2% — ranging. Low momentum, neutral sentiment, sideways price structure.",
+        )
+        if not CMC_API_KEY:
+            print("⚠  CMC_API_KEY not set — using demo data\n", file=sys.stderr)
+    else:
+        result = detect_regime()
+
+    regime_label = {
+        Regime.TRENDING_UP: "TRENDING UP ↑",
+        Regime.TRENDING_DOWN: "TRENDING DOWN ↓",
+        Regime.RANGING: "RANGING ↔",
+        Regime.RISK_OFF: "RISK OFF ⚠",
+    }[result.regime]
+
+    confidence_bar = "█" * int(result.confidence * 10) + "░" * (10 - int(result.confidence * 10))
+
+    # Box drawing
+    W = 42
+    top = "╔" + "═" * W + "╗"
+    sep = "╠" + "═" * W + "╣"
+    bot = "╚" + "═" * W + "╝"
+
+    print(top)
+    print(f"║ {'NEXUS REGIME DETECTION':^{W}} ║")
+    print(sep)
+    print(f"║ {'Regime:':<15} {regime_label:<{W-17}} ║")
+    print(f"║ {'Confidence:':<15} {result.confidence:.0%}  [{confidence_bar}] ║")
+    print(f"║ {'Fear & Greed:':<15} {result.fear_greed:<{W-17}} ║")
+    print(f"║ {'BTC Dominance:':<15} {result.btc_dominance:.1f}%{'':<{W-22}} ║")
+    print(f"║ {'24h Change:':<15} {result.total_mc_change_24h:+.1f}%{'':<{W-22}} ║")
+    print(sep)
+
+    gates = _strategy_gates(result.regime, result.fear_greed)
+    for name, status in gates:
+        arrow = "→" if "BLOCKED" not in status else "✕"
+        print(f"║   {arrow} {name:<20} {status:<{W-26}} ║")
+
+    print(bot)
+    print(f"\n  Reasoning: {result.reasoning}")
 
 
 if __name__ == "__main__":
