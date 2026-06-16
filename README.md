@@ -4,6 +4,8 @@
 
 > 🏆 BNB Hack: AI Trading Agents (June 2026) — Track 1 + Track 2
 
+🎬 **Demo Video:** [Watch on GitHub Releases](https://github.com/Bullit84/nexus-arbiter/releases/download/v1.0-demo/demo_final.mp4)
+
 Battle-tested autonomous trading agent with **155 live BSC mainnet trades** and a deterministic 7-stage pipeline that prevents the failure modes killing most trading bots.
 
 ![NEXUS Logo](assets/logo.png)
