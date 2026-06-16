@@ -56,7 +56,7 @@ class TrustWalletExecutor:
 
     def get_wallet_address(self) -> str:
         """Returns the agent's BSC wallet address."""
-        return os.getenv("WALLET_ADDRESS", "0x236f03bBba0903321C73c929530DEaa842D6Ba76")
+        return os.getenv("WALLET_ADDRESS", "0x9Ca48a622102e3D7451A0a1f6373e31f3d161f0B")
 
     def get_bnb_balance(self) -> float:
         """Query BNB balance from BSC."""

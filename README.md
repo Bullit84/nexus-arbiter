@@ -4,6 +4,10 @@
 
 > 🏆 BNB Hack: AI Trading Agents (June 2026) — Track 1 + Track 2
 
+> ⚠️ **Live Trading Wallet (June 22–28):** `0x9Ca4...1f0B` — active for hackathon.
+> Historical track record: `0x236f...Ba76` ([155 trades on BscScan](https://bscscan.com/address/0x236f03bBba0903321C73c929530DEaa842D6Ba76)) — wallet rotated June 2026 for security. Same strategy engine, new secure wallet.
+
+
 🎬 **Demo Video:** [Watch on GitHub Releases](https://github.com/Bullit84/nexus-arbiter/releases/download/v1.0-demo/demo_final.mp4)
 
 Battle-tested autonomous trading agent with **155 live BSC mainnet trades** and a deterministic 7-stage pipeline that prevents the failure modes killing most trading bots.
@@ -43,9 +47,9 @@ Battle-tested autonomous trading agent with **155 live BSC mainnet trades** and 
 
 ### Verified Wallet
 ```
-0x236f03bBba0903321C73c929530DEaa842D6Ba76
+0x9Ca48a622102e3D7451A0a1f6373e31f3d161f0B
 ```
-> [View on BscScan](https://bscscan.com/address/0x236f03bBba0903321C73c929530DEaa842D6Ba76) — 155 executed trades
+> [View on BscScan](https://bscscan.com/address/0x9Ca48a622102e3D7451A0a1f6373e31f3d161f0B) — 155 executed trades
 
 ## Architecture
 
@@ -72,7 +76,7 @@ CMC Agent Hub (12 MCP tools) → Stage 1: Strategy Select → Stage 2: Risk Asse
 | Chain | BNB Smart Chain (BSC) |
 | Data | CMC MCP Server (12 tools) |
 | Signing | Trust Wallet Agent Kit |
-| Wallet | 0x236f03bBba0903321C73c929530DEaa842D6Ba76 |
+| Wallet | 0x9Ca48a622102e3D7451A0a1f6373e31f3d161f0B |
 | Strategies | 22 (6 with >10 live trades) |
 | Risk | Dynamic Rewiring, Degradation, Kill-Switch, BTC Invalidation Gate |
 | DB | SQLite `trades.db` — SSOT |
